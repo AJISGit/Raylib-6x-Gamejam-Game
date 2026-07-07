@@ -1,9 +1,12 @@
 #pragma once
+#include "raylib.h"
 
 namespace Game {
 
 
 	class Hex;
+
+	constexpr float HEX_SIZE = 5.0f;
 
 	class Hex {
 
@@ -27,7 +30,12 @@ namespace Game {
 		Hex operator-(Hex a);
 		Hex operator*(Hex a);
 
+		Vector2 ToPixel() const;
+
 	};
+
+	Hex PixelToHex(Vector2 pixel);
+	Hex AxialToCube(Vector2 axial);
 
 }
 

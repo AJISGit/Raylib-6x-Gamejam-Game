@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <cmath>
 #include "hex.hpp"
 
 
@@ -62,4 +63,31 @@ Game::Hex Game::Hex::operator*(Game::Hex a) {
 }
 
 
+Vector2 Game::Hex::ToPixel() const {
+
+	float x = (3.0f / 2.0f) * q;
+	float y = std::sqrt(3) / 2 * q + std::sqrt(3) * r;
+
+	x *= Game::HEX_SIZE;
+	y *= Game::HEX_SIZE;
+
+	return { x, y };
+
+}
+
+
+Game::Hex Game::PixelToHex(Vector2 pixel) {
+
+	float q = std::sqrt(3.0f) / 3.0f * pixel.x + -1.0f/3.0f * pixel.y;
+    float r = 2.0f/3.0f * pixel.y;
+    return Game::AxialToCube({q, r});
+
+}
+
+
+Game::Hex Game::AxialToCube(Vector2 axial) {
+
+	return Game::Hex(axial.x, axial.y, -axial.x - axial.y);
+
+}
 
