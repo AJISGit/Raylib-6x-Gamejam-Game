@@ -6,7 +6,7 @@ namespace Game {
 
 	class Hex;
 
-	constexpr float HEX_SIZE = 5.0f;
+	constexpr float HEX_SIZE = 50.0f;
 
 	class Hex {
 
@@ -36,6 +36,8 @@ namespace Game {
 
 	Hex PixelToHex(Vector2 pixel);
 	Hex AxialToCube(Vector2 axial);
+
+	void DrawHexagon(Hex hex, Color color);
 
 }
 

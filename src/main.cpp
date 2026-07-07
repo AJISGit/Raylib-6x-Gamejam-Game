@@ -22,9 +22,10 @@ const int screenHeight = 720;
 RenderTexture2D target = { 0 };
 
 
-Game::Hex hex1(1, -1, 0);
-Game::Hex hex2(0, 1, -1);
-Game::Hex hex3 = hex1 + hex2;
+Game::Hex hex1(0, 0, 0);
+Game::Hex hex2(1, 0, -1);
+Game::Hex hex3(2, 0, -2);
+Game::Hex hex4(2, -1, -1);
 
 void UpdateDrawFrame(void);
 
@@ -58,9 +59,12 @@ int main(void) {
 void UpdateDrawFrame(void) {
 
     BeginTextureMode(target);
-        ClearBackground(RAYWHITE);
+        ClearBackground(WHITE);
 
-		DrawText(TextFormat("%d, %d, %d", hex3.GetQ(), hex3.GetR(), hex3.GetS()), 300, 350, 15, BLACK);
+		Game::DrawHexagon(hex1, BLACK);
+		Game::DrawHexagon(hex2, GREEN);
+		Game::DrawHexagon(hex3, BLUE);
+		Game::DrawHexagon(hex4, RED);
         
     EndTextureMode();
     

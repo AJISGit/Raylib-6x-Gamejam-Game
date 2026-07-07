@@ -91,3 +91,11 @@ Game::Hex Game::AxialToCube(Vector2 axial) {
 
 }
 
+
+
+void Game::DrawHexagon(Game::Hex hex, Color color) {
+
+	DrawPoly(hex.ToPixel(), 6, Game::HEX_SIZE, 0, color);
+
+}
+
