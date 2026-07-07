@@ -1,12 +1,15 @@
 #pragma once
 #include "raylib.h"
+#include <unordered_set>
 
 namespace Game {
 
 
 	class Hex;
 
-	constexpr float HEX_SIZE = 50.0f;
+	constexpr float HEX_SIZE = 100.0f;
+	constexpr float HEX_ORIGIN_X = 360.0f;
+	constexpr float HEX_ORIGIN_Y = 360.0f;
 
 	class Hex {
 
@@ -24,8 +27,8 @@ namespace Game {
 
 		void SetCoords(int q, int r, int s);
 
-		bool operator==(Hex a);
-		bool operator!=(Hex a);
+		bool operator==(Hex a) const;
+		bool operator!=(Hex a) const;
 		Hex operator+(Hex a);
 		Hex operator-(Hex a);
 		Hex operator*(Hex a);
@@ -39,5 +42,18 @@ namespace Game {
 
 	void DrawHexagon(Hex hex, Color color);
 
+}
+
+
+namespace std {
+	template <> struct hash<Game::Hex> {
+		size_t operator()(const Game::Hex& h) const {
+			hash<int> int_hash;
+			size_t hq = int_hash(h.GetQ());
+			size_t hr = int_hash(h.GetR());
+			return hq ^ (hr + 0x9e3779b9 + (hq << 6) + (hq >> 2));
+			
+		}
+	};
 }
 

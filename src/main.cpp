@@ -1,11 +1,12 @@
 #include "raylib.h"
-#include "hex.hpp"
+#include "grid.hpp"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h> 
 #endif
 
 #include <stdio.h> 
+#include <iostream>
 
 #define SUPPORT_LOG_INFO
 #if defined(SUPPORT_LOG_INFO)
@@ -19,27 +20,43 @@
 const int screenWidth = 720;
 const int screenHeight = 720;
 
+const float cameraSpeed = 300.0f;
+
 RenderTexture2D target = { 0 };
+Camera2D camera = { 0 };
 
+float x = 0.0f;// Game::HEX_ORIGIN_X;
+float y = 0.0f;//Game::HEX_ORIGIN_Y;
 
-Game::Hex hex1(0, 0, 0);
-Game::Hex hex2(1, 0, -1);
-Game::Hex hex3(2, 0, -2);
-Game::Hex hex4(2, -1, -1);
 
 void UpdateDrawFrame(void);
 
 
 int main(void) {
 
+
+	// Generate Map
+	int N = 10;
+	for (int q = -N; q <= N; q++) {
+    	int r1 = std::max(-N, -q - N);
+	    int r2 = std::min( N, -q + N);
+	    for (int r = r1; r <= r2; r++) {
+			Game::grid.insert(Game::Hex(q, r, -q-r));
+   		}
+	}
+
+
 	#if !defined(_DEBUG)
     	SetTraceLogLevel(LOG_NONE); 
 	#endif
 
     InitWindow(screenWidth, screenHeight, "raylib gamejam template");
+
+	target = LoadRenderTexture(720, 720);
+	SetTextureFilter(target.texture, TEXTURE_FILTER_POINT);
     
-    target = LoadRenderTexture(screenWidth, screenHeight);
-    SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
+	camera.target = { Game::HEX_ORIGIN_X, Game::HEX_ORIGIN_Y };
+	camera.zoom = 1.0f;
 
 	#if defined(PLATFORM_WEB)
     	emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -50,7 +67,8 @@ int main(void) {
 	    }
 	#endif
 
-    UnloadRenderTexture(target);
+
+	UnloadRenderTexture(target);
     CloseWindow();
     return 0;
 }
@@ -58,21 +76,39 @@ int main(void) {
 
 void UpdateDrawFrame(void) {
 
-    BeginTextureMode(target);
-        ClearBackground(WHITE);
 
-		Game::DrawHexagon(hex1, BLACK);
-		Game::DrawHexagon(hex2, GREEN);
-		Game::DrawHexagon(hex3, BLUE);
-		Game::DrawHexagon(hex4, RED);
-        
-    EndTextureMode();
-    
+	if (IsKeyDown(KEY_W)) {
+		y -= cameraSpeed * GetFrameTime();
+	}
+	if (IsKeyDown(KEY_A)) {
+		x -= cameraSpeed * GetFrameTime();
+	}
+	if (IsKeyDown(KEY_S)) {
+		y += cameraSpeed * GetFrameTime();
+	}
+	if (IsKeyDown(KEY_D)) {
+		x += cameraSpeed * GetFrameTime();
+	}
+	camera.target = { x, y };
+
+	BeginTextureMode(target);
+
+		ClearBackground(RAYWHITE);
+ 		BeginMode2D(camera);
+			unsigned char i = 0;
+			for (const Game::Hex& hexagon : Game::grid) {
+				Game::DrawHexagon(hexagon, {i, i, i, 255});
+				i++;
+			}
+		EndMode2D();       
+
+	EndTextureMode();
 
     BeginDrawing();
-        ClearBackground(RAYWHITE);
-        
-        DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, -(float)target.texture.height }, (Rectangle){ 0, 0, (float)target.texture.width, (float)target.texture.height }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+		
+		ClearBackground(WHITE);
+		DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, -(float)target.texture.height }, (Rectangle){ 0, 0, (float)target.texture.width, (float)target.texture.height }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+
 
     EndDrawing();
 

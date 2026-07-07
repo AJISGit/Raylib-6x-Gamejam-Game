@@ -38,12 +38,12 @@ void Game::Hex::SetCoords(int q, int r, int s) {
 
 
 
-bool Game::Hex::operator==(Game::Hex a) {
+bool Game::Hex::operator==(Game::Hex a) const {
 	return (a.q == q && a.r == r && a.s == s);
 }
 
 
-bool Game::Hex::operator!=(Game::Hex a) {
+bool Game::Hex::operator!=(Game::Hex a) const {
 	return !(a == *this); 
 }
 
@@ -70,6 +70,8 @@ Vector2 Game::Hex::ToPixel() const {
 
 	x *= Game::HEX_SIZE;
 	y *= Game::HEX_SIZE;
+	x += Game::HEX_ORIGIN_X;
+	y += Game::HEX_ORIGIN_Y;
 
 	return { x, y };
 
