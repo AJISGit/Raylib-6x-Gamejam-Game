@@ -26,9 +26,6 @@ const float cameraSpeed = 400.0f;
 RenderTexture2D target = { 0 };
 Camera2D camera = { 0 };
 
-float x = 0.0f;// Game::HEX_ORIGIN_X;
-float y = 0.0f;//Game::HEX_ORIGIN_Y;
-
 
 void UpdateDrawFrame(void);
 
@@ -56,7 +53,7 @@ int main(void) {
 	target = LoadRenderTexture(720, 720);
 	SetTextureFilter(target.texture, TEXTURE_FILTER_POINT);
     
-	camera.target = { Game::HEX_ORIGIN_X, Game::HEX_ORIGIN_Y };
+	camera.target = { 0.0f, 0.0f };
 	camera.zoom = 1.0f;
 
 	#if defined(PLATFORM_WEB)
@@ -107,7 +104,15 @@ void UpdateDrawFrame(void) {
  		BeginMode2D(camera);
 			unsigned char i = 0;
 			for (const Game::Hex& hexagon : Game::grid) {
-				Game::DrawHexagon(hexagon, {i, i, i, 255});
+				Color color = {0, 0, 0, 0};
+
+				if (hexagon == Game::Hex(0, 0, 0)) {
+					color = BLUE;
+				} else {
+					color = { i, i, i, 255 };
+				}
+
+				Game::DrawHexagon(hexagon, color);
 				i++;
 			}
 		EndMode2D();       
