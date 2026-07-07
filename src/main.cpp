@@ -21,25 +21,45 @@
 const int screenWidth = 720;
 const int screenHeight = 720;
 
+
+
+const float renderingLimitLeft = -50.0f;
+const float renderingLimitRight = 770.0f;
+
+const float renderingLimitUp = -50.0f;
+const float renderingLimitDown = 770.0f;
+
+
+
 const float cameraSpeed = 400.0f;
 
 RenderTexture2D target = { 0 };
 Camera2D camera = { 0 };
 
+bool showFps = false;
+
 
 void UpdateDrawFrame(void);
 
 
-int main(void) {
+int main(int argc, char** argv) {
 
+	if (argc > 1) {
+		showFps = true;
+	}
 
 	// Generate Map
-	int N = 10;
+	int N = 50;
 	for (int q = -N; q <= N; q++) {
     	int r1 = std::max(-N, -q - N);
 	    int r2 = std::min( N, -q + N);
 	    for (int r = r1; r <= r2; r++) {
-			Game::grid.insert(Game::Hex(q, r, -q-r));
+			Game::Tile& tile = Game::grid.AddTile({ q, r, -q-r }, 1);
+			if (tile.GetPosition() == Game::Hex( 0, 0, 0 )) {
+				tile.SetType(Game::TileType::Player);
+			} else {
+				tile.SetType(Game::TileType::Empty);
+			}
    		}
 	}
 
@@ -59,7 +79,9 @@ int main(void) {
 	#if defined(PLATFORM_WEB)
     	emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 	#else
-    	SetTargetFPS(60);
+		if (showFps) {
+    		SetTargetFPS(60);
+		}
 	    while (!WindowShouldClose()) {
 	        UpdateDrawFrame();
 	    }
@@ -100,20 +122,26 @@ void UpdateDrawFrame(void) {
 
 	BeginTextureMode(target);
 
-		ClearBackground(RAYWHITE);
+		ClearBackground(BLACK);
  		BeginMode2D(camera);
-			unsigned char i = 0;
-			for (const Game::Hex& hexagon : Game::grid) {
-				Color color = {0, 0, 0, 0};
+			for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
 
-				if (hexagon == Game::Hex(0, 0, 0)) {
-					color = BLUE;
-				} else {
-					color = { i, i, i, 255 };
+				Vector2 pixelPos = key.first.ToPixel();
+				bool render = true;
+
+
+				pixelPos = GetWorldToScreen2D(pixelPos, camera);				
+				if (
+					(pixelPos.x < renderingLimitLeft) || (pixelPos.x > renderingLimitRight) ||
+					(pixelPos.y < renderingLimitUp) || (pixelPos.y > renderingLimitDown)
+				) {
+					render = false;
 				}
 
-				Game::DrawHexagon(hexagon, color);
-				i++;
+				if (render) {
+					Game::DrawTile(*key.second);
+				}
+
 			}
 		EndMode2D();       
 
@@ -123,6 +151,9 @@ void UpdateDrawFrame(void) {
 		
 		ClearBackground(WHITE);
 		DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, -(float)target.texture.height }, (Rectangle){ 0, 0, (float)target.texture.width, (float)target.texture.height }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+		if (showFps) {
+			DrawFPS(10, 10);
+		}
 
 
     EndDrawing();

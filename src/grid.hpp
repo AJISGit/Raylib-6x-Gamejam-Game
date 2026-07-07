@@ -1,10 +1,28 @@
 #pragma once
 #include "hex.hpp"
-#include <unordered_set>
+#include "tile.hpp"
+#include <unordered_map>
+#include <functional>
 
 
 namespace Game {
 
-	extern std::unordered_set<Hex> grid;
+
+	class TileGrid final {
+
+		private:
+		std::unordered_map<Hex, Tile*> tiles;
+
+		public:
+		~TileGrid();
+
+		Tile& GetTile(Hex pos) const;
+		Tile& AddTile(Hex pos, std::uint16_t troops);
+
+		std::unordered_map<Hex, Tile*> GetTiles() const;
+
+	};
+
+	extern TileGrid grid;
 
 }
