@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include "grid.hpp"
 
 #if defined(PLATFORM_WEB)
@@ -20,7 +21,7 @@
 const int screenWidth = 720;
 const int screenHeight = 720;
 
-const float cameraSpeed = 300.0f;
+const float cameraSpeed = 400.0f;
 
 RenderTexture2D target = { 0 };
 Camera2D camera = { 0 };
@@ -78,18 +79,27 @@ void UpdateDrawFrame(void) {
 
 
 	if (IsKeyDown(KEY_W)) {
-		y -= cameraSpeed * GetFrameTime();
+		camera.target.y -= cameraSpeed * GetFrameTime();
 	}
 	if (IsKeyDown(KEY_A)) {
-		x -= cameraSpeed * GetFrameTime();
+		camera.target.x -= cameraSpeed * GetFrameTime();
 	}
 	if (IsKeyDown(KEY_S)) {
-		y += cameraSpeed * GetFrameTime();
+		camera.target.y += cameraSpeed * GetFrameTime();
 	}
 	if (IsKeyDown(KEY_D)) {
-		x += cameraSpeed * GetFrameTime();
+		camera.target.x += cameraSpeed * GetFrameTime();
 	}
-	camera.target = { x, y };
+
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+		
+		Vector2 delta = GetMouseDelta();
+		delta = Vector2Scale(delta, -1.0f / camera.zoom);
+		camera.target = Vector2Add(camera.target, delta);
+
+	}
+
+
 
 	BeginTextureMode(target);
 
