@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "grid.hpp"
+#include "textures.hpp"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h> 
@@ -57,6 +58,7 @@ int main(int argc, char** argv) {
 			Game::Tile& tile = Game::grid.AddTile({ q, r, -q-r }, 1);
 			if (tile.GetPosition() == Game::Hex( 0, 0, 0 )) {
 				tile.SetType(Game::TileType::Player);
+				tile.SetLandType(Game::TileLand::King);
 			} else {
 				tile.SetType(Game::TileType::Empty);
 			}
@@ -70,16 +72,23 @@ int main(int argc, char** argv) {
 
     InitWindow(screenWidth, screenHeight, "raylib gamejam template");
 
+	// Initialize Stuff
 	target = LoadRenderTexture(720, 720);
 	SetTextureFilter(target.texture, TEXTURE_FILTER_POINT);
+
+	Game::Textures::King = LoadTexture("resources/king.png");
+
     
 	camera.target = { 0.0f, 0.0f };
 	camera.zoom = 1.0f;
 
+
+
+	// Do Things
 	#if defined(PLATFORM_WEB)
     	emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 	#else
-		if (showFps) {
+		if (!showFps) {
     		SetTargetFPS(60);
 		}
 	    while (!WindowShouldClose()) {
@@ -88,6 +97,8 @@ int main(int argc, char** argv) {
 	#endif
 
 
+	// Bye Bye!
+	UnloadTexture(Game::Textures::King);
 	UnloadRenderTexture(target);
     CloseWindow();
     return 0;
@@ -118,6 +129,10 @@ void UpdateDrawFrame(void) {
 
 	}
 
+
+	for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
+		key.second->Update();
+	}
 
 
 	BeginTextureMode(target);

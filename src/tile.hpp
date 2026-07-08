@@ -1,11 +1,13 @@
 #pragma once
 #include "hex.hpp"
 #include <cstdint>
+#include <optional>
 
 
 namespace Game {
 
 	enum class TileType { Player, Enemy, Empty };
+	enum class TileLand { King, Blank };
 	
 	class Tile {
 		
@@ -14,6 +16,9 @@ namespace Game {
 		Hex position = { 0, 0, 0 };
 		std::uint16_t troops = 0;
 		TileType type = TileType::Empty;
+		TileLand landType = TileLand::Blank;
+
+		double lastTroopAdd = 0.0f;
 
 		public:
 
@@ -24,10 +29,20 @@ namespace Game {
 		std::uint16_t GetTroops() const;
 		void SetTroops(std::uint16_t troops);
 		void AddTroop();
+		void RemoveTroop();
+		void AddTroops(std::uint16_t troops);
+		void RemoveTroops(std::uint16_t troops);
 
 		TileType GetType() const;
 		void SetType(TileType type);
+
+		TileLand GetLandType() const;
+		void SetLandType(TileLand land);
+
+		std::optional<Texture2D> GetTexure() const;
 		Color GetColor() const;
+
+		void Update();
 
 
 	};
