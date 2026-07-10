@@ -15,6 +15,7 @@ namespace Game {
 
 		Hex position = { 0, 0, 0 };
 		std::uint16_t troops = 0;
+		std::uint16_t strength = 1;
 		TileType type = TileType::Empty;
 		TileLand landType = TileLand::Blank;
 
@@ -33,6 +34,10 @@ namespace Game {
 		void AddTroops(std::uint16_t troops);
 		void RemoveTroops(std::uint16_t troops);
 
+		std::uint16_t GetStrength() const;
+		void SetStrength(std::uint16_t strength);
+
+
 		TileType GetType() const;
 		void SetType(TileType type);
 
@@ -48,5 +53,7 @@ namespace Game {
 	};
 
 	void DrawTile(const Tile& tile);
+	void MoveTroops_(Tile& from, Tile& to, std::uint16_t troops);
+	void MoveTroops(Tile& from, Tile& to, std::int16_t troops);
 
 }

@@ -1,7 +1,9 @@
 #include "tile.hpp"
 #include "textures.hpp"
+#include "timers.hpp"
 #include <cmath>
 #include <string>
+#include <iostream>
 
 
 Game::Tile::Tile(Game::Hex position, std::uint16_t troops = 1) {
@@ -34,7 +36,10 @@ void Game::Tile::SetTroops(std::uint16_t troops) {
 
 void Game::Tile::AddTroop() {
 	++troops;
-	lastTroopAdd = GetTime();
+	if (type == Game::TileType::Empty) { return; }
+	if (landType != Game::TileLand::Blank) {
+		this->lastTroopAdd = GetTime();
+	}
 }
 
 
@@ -53,6 +58,16 @@ void Game::Tile::RemoveTroops(std::uint16_t troops) {
 }
 
 
+std::uint16_t Game::Tile::GetStrength() const {
+	return strength;
+}
+
+
+void Game::Tile::SetStrength(std::uint16_t strength) {
+	this->strength = strength;
+}
+
+
 Game::TileType Game::Tile::GetType() const {
 	return type;
 }
@@ -61,7 +76,6 @@ Game::TileType Game::Tile::GetType() const {
 void Game::Tile::SetType(Game::TileType type) {
 	this->type = type;
 }
-
 
 
 Game::TileLand Game::Tile::GetLandType() const {
@@ -111,8 +125,9 @@ void Game::Tile::Update() {
 
 		case Game::TileLand::Blank:
 			if (type == Game::TileType::Empty) { return; }
+			SetStrength(GetTroops() - 1);
 
-			if (GetTime() - lastTroopAdd > 10.0) {
+			if (GetTime() - Game::lastTroopAdd >= troopAddDelay) {
 				AddTroop();
 			}
 			return;
@@ -121,6 +136,7 @@ void Game::Tile::Update() {
 			if (GetTime() - lastTroopAdd > 1.0) {
 				AddTroop();
 			}
+			SetStrength(GetTroops());
 			return;
 
 	}
@@ -143,7 +159,7 @@ void Game::DrawTile(const Game::Tile& tile) {
 	}
 
 	// Draw the troop count
-	if (tile.GetTroops() == 0) { return; }
+	if ((tile.GetTroops() <= 1) && (tile.GetType() == Game::TileType::Empty)) { return; }
 
 	std::string troopText = std::to_string(tile.GetTroops());
 	int textSize = 15;
@@ -152,3 +168,47 @@ void Game::DrawTile(const Game::Tile& tile) {
 
 }
 
+
+void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::uint16_t troops = 0) {
+
+	if (from.GetTroops() < 2) { return; }
+
+	
+	if ((from.GetType() != to.GetType()) && ((from.GetTroops() + 1) <= to.GetStrength())) { return; }
+
+
+	std::uint16_t troopAmount = troops;
+	if (troops == 0) {
+		troopAmount = from.GetTroops() - 1;
+	}
+
+
+	from.RemoveTroops(troopAmount);
+
+
+	if (from.GetType() != to.GetType()) {
+		to.AddTroops(troopAmount - to.GetStrength());
+	} else {
+		to.AddTroops(troopAmount);
+	}
+
+	to.SetType(Game::TileType::Player);
+
+}
+
+
+void Game::MoveTroops(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0) {
+
+	Game::Hex fromPos = from.GetPosition();
+	Game::Hex toPos = to.GetPosition();
+	int q, r, s;
+	q = fromPos.GetQ() - toPos.GetQ();
+	r = fromPos.GetR() - toPos.GetR();
+	s = fromPos.GetS() - toPos.GetS();
+
+	if ((std::abs(q) > 1) || (std::abs(r) > 1) || (std::abs(s) > 1)) {
+		return;
+	}
+	Game::MoveTroops_(from, to, troops);
+
+}

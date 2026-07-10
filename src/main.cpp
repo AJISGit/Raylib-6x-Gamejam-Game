@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "grid.hpp"
+#include "timers.hpp"
 #include "textures.hpp"
 
 #if defined(PLATFORM_WEB)
@@ -39,6 +40,9 @@ Camera2D camera = { 0 };
 
 bool showFps = false;
 
+Game::Tile* selectedTile = nullptr;
+Game::Tile* lastSelectedTile = nullptr;
+
 
 void UpdateDrawFrame(void);
 
@@ -50,20 +54,27 @@ int main(int argc, char** argv) {
 	}
 
 	// Generate Map
-	int N = 50;
+	int N = 25;
 	for (int q = -N; q <= N; q++) {
     	int r1 = std::max(-N, -q - N);
 	    int r2 = std::min( N, -q + N);
 	    for (int r = r1; r <= r2; r++) {
-			Game::Tile& tile = Game::grid.AddTile({ q, r, -q-r }, 1);
+			Game::Tile& tile = Game::grid.AddTile({ q, r, -q-r }, 0);
 			if (tile.GetPosition() == Game::Hex( 0, 0, 0 )) {
 				tile.SetType(Game::TileType::Player);
 				tile.SetLandType(Game::TileLand::King);
+				tile.SetTroops(2);
 			} else {
 				tile.SetType(Game::TileType::Empty);
+				tile.SetLandType(Game::TileLand::Blank);
+				tile.SetStrength(0);
 			}
    		}
 	}
+
+
+	// Set up selection
+	selectedTile = &Game::grid.GetTile({ 0, 0, 0 });
 
 
 	#if !defined(_DEBUG)
@@ -130,9 +141,40 @@ void UpdateDrawFrame(void) {
 	}
 
 
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		lastSelectedTile = selectedTile;
+
+		for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
+
+			Vector2 pixelPos = key.first.ToPixel();
+
+			pixelPos = GetWorldToScreen2D(pixelPos, camera);				
+			if (
+				(pixelPos.x < renderingLimitLeft) || (pixelPos.x > renderingLimitRight) ||
+				(pixelPos.y < renderingLimitUp) || (pixelPos.y > renderingLimitDown)
+			) {
+				continue;
+			}
+
+			if (!CheckCollisionPointCircle(GetMousePosition(), pixelPos, Game::HEX_SIZE)) { continue; }
+			selectedTile = key.second;
+			break;
+
+		}
+
+		Game::MoveTroops(*lastSelectedTile, *selectedTile, 0);
+	}
+
+
 	for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
 		key.second->Update();
 	}
+
+	if (GetTime() - Game::lastTroopAdd >= Game::troopAddDelay) {
+		Game::lastTroopAdd = GetTime();
+	}
+	
+
 
 
 	BeginTextureMode(target);
@@ -155,6 +197,9 @@ void UpdateDrawFrame(void) {
 
 				if (render) {
 					Game::DrawTile(*key.second);
+					if (key.second == selectedTile) {
+						Game::DrawHexagon(key.second->GetPosition(), { 255, 255, 255, 100 }, 1.0f);
+					}
 				}
 
 			}

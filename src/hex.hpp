@@ -37,8 +37,12 @@ namespace Game {
 
 	};
 
+	Hex CubeRound(float q, float r, float s);
+	Vector2 AxialRound(Vector2 axial);
+
 	Hex PixelToHex(Vector2 pixel);
 	Hex AxialToCube(Vector2 axial);
+	Vector2 CubeToAxial(Hex cube);
 
 	void DrawHexagon(Hex hex, Color color, float scale);
 

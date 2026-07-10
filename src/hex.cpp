@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <cmath>
 #include "hex.hpp"
+#include <iostream>
 
 
 Game::Hex::Hex(int q, int r, int s) {
@@ -80,9 +81,23 @@ Vector2 Game::Hex::ToPixel() const {
 
 Game::Hex Game::PixelToHex(Vector2 pixel) {
 
-	float q = std::sqrt(3.0f) / 3.0f * pixel.x + -1.0f/3.0f * pixel.y;
-    float r = 2.0f/3.0f * pixel.y;
-    return Game::AxialToCube({q, r});
+	float x = pixel.x - HEX_ORIGIN_X;
+	float y = pixel.y - HEX_ORIGIN_Y;
+
+    // invert the scaling
+    x = pixel.x / HEX_SIZE;
+    y = pixel.y / HEX_SIZE;
+    // cartesian to hex
+    float q = ((2.0f/3.0f) * x);
+    float r = (((-1.0f/3.0f) * x) + (std::sqrt(3.0f)/3) * y);
+
+
+	std::cout << "Pixel: ( " << pixel.x << ", " << pixel.y << " )\n";
+	std::cout << "Hex: ( " << q << ", " << r << ", " << -q - r << " )\n";
+
+	Game::Hex result = Game::AxialToCube(Game::AxialRound({ q, r }));
+
+    return result;
 
 }
 
@@ -93,6 +108,40 @@ Game::Hex Game::AxialToCube(Vector2 axial) {
 
 }
 
+
+Vector2 Game::CubeToAxial(Game::Hex cube) {
+	return { static_cast<float>(cube.GetQ()), static_cast<float>(cube.GetR()) };
+}
+
+
+Game::Hex Game::CubeRound(float q, float r, float s) {
+	
+	float roundQ = std::round(q);
+	float roundR = std::round(r);
+	float roundS = std::round(s);
+	float qDiff = std::fabs(roundQ - q);
+	float rDiff = std::fabs(roundR - r);
+	float sDiff = std::fabs(roundS - s);
+
+	if ((qDiff > rDiff) && (qDiff > sDiff)) {
+        roundQ = -r-s;
+    } else if (rDiff > sDiff) {
+        roundR = -q-s;
+	} else {
+        roundS = -q-r;
+	}
+
+	return Game::Hex(roundQ, roundR, roundS);
+
+}
+
+
+Vector2 Game::AxialRound(Vector2 axial) {
+
+	Game::Hex cube = Game::CubeRound(axial.x, axial.y, -axial.x - axial.y);
+	return CubeToAxial(cube);
+
+}
 
 
 void Game::DrawHexagon(Game::Hex hex, Color color, float scale = 1.0f) {
