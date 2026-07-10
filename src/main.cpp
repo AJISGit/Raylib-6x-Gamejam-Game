@@ -3,6 +3,7 @@
 #include "grid.hpp"
 #include "timers.hpp"
 #include "textures.hpp"
+#include <ctime>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h> 
@@ -53,7 +54,11 @@ int main(int argc, char** argv) {
 		showFps = true;
 	}
 
+	SetRandomSeed(std::time(NULL));
+
 	// Generate Map
+	
+	int cityChance = 20;
 	int N = 25;
 	for (int q = -N; q <= N; q++) {
     	int r1 = std::max(-N, -q - N);
@@ -65,9 +70,26 @@ int main(int argc, char** argv) {
 				tile.SetLandType(Game::TileLand::King);
 				tile.SetTroops(2);
 			} else {
-				tile.SetType(Game::TileType::Empty);
-				tile.SetLandType(Game::TileLand::Blank);
-				tile.SetStrength(0);
+				
+				if (GetRandomValue(1, cityChance) == 1) {
+					tile.SetLandType(Game::TileLand::City);
+					tile.SetStrength(GetRandomValue(30, 50));
+					tile.SetType(Game::TileType::Empty);
+
+
+					if (GetRandomValue(1, 3) >= 2) {
+						cityChance = std::floor(static_cast<float>(cityChance) / 1.1f);
+					} else {
+						cityChance = std::ceil(static_cast<float>(cityChance) * 1.5f);
+					}
+
+
+				} else {
+
+					tile.SetType(Game::TileType::Empty);
+					tile.SetLandType(Game::TileLand::Blank);
+					tile.SetStrength(0);
+				}
 			}
    		}
 	}
@@ -88,6 +110,7 @@ int main(int argc, char** argv) {
 	SetTextureFilter(target.texture, TEXTURE_FILTER_POINT);
 
 	Game::Textures::King = LoadTexture("resources/king.png");
+	Game::Textures::City = LoadTexture("resources/city.png");
 
     
 	camera.target = { 0.0f, 0.0f };
@@ -170,8 +193,12 @@ void UpdateDrawFrame(void) {
 		key.second->Update();
 	}
 
+	// Timers
 	if (GetTime() - Game::lastTroopAdd >= Game::troopAddDelay) {
 		Game::lastTroopAdd = GetTime();
+	}
+	if (GetTime() - Game::lastCityAdd >= Game::cityAddDelay) {
+		Game::lastCityAdd = GetTime();
 	}
 	
 

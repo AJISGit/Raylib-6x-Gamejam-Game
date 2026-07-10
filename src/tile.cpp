@@ -94,6 +94,8 @@ std::optional<Texture2D> Game::Tile::GetTexure() const {
 
 		case Game::TileLand::Blank:
 			return std::nullopt;
+		case Game::TileLand::City:
+			return Game::Textures::City;
 		case Game::TileLand::King:
 			return Game::Textures::King;
 
@@ -132,6 +134,13 @@ void Game::Tile::Update() {
 			}
 			return;
 
+		case Game::TileLand::City:
+			if (type == Game::TileType::Empty) { return; }
+			if (GetTime() - Game::lastCityAdd > Game::cityAddDelay) {
+				AddTroop();
+			}
+			SetStrength(GetTroops());
+			return;
 		case Game::TileLand::King:
 			if (GetTime() - lastTroopAdd > 1.0) {
 				AddTroop();
@@ -159,10 +168,14 @@ void Game::DrawTile(const Game::Tile& tile) {
 	}
 
 	// Draw the troop count
-	if ((tile.GetTroops() <= 1) && (tile.GetType() == Game::TileType::Empty)) { return; }
+	if ((tile.GetTroops() <= 1) && (tile.GetType() == Game::TileType::Empty) && (tile.GetLandType() != Game::TileLand::City)) { return; }
 
 	std::string troopText = std::to_string(tile.GetTroops());
 	int textSize = 15;
+
+	if ((tile.GetType() == Game::TileType::Empty) && (tile.GetLandType() == Game::TileLand::City)) {
+		troopText = std::to_string(tile.GetStrength());
+	}
 
 	DrawText(troopText.c_str(), pixelPos.x - MeasureText(troopText.c_str(), textSize) + 3, pixelPos.y - 5.0f, textSize, WHITE);
 

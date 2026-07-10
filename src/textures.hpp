@@ -4,5 +4,6 @@
 namespace Game::Textures {
 
 	extern Texture2D King;
+	extern Texture2D City;
 
 }

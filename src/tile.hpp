@@ -7,7 +7,7 @@
 namespace Game {
 
 	enum class TileType { Player, Enemy, Empty };
-	enum class TileLand { King, Blank };
+	enum class TileLand { King, City, Blank };
 	
 	class Tile {
 		
