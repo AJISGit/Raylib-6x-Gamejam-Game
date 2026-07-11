@@ -41,6 +41,7 @@ RenderTexture2D target = { 0 };
 Camera2D camera = { 0 };
 
 bool showFps = false;
+bool playerAlive = true;
 
 Game::Tile* selectedTile = nullptr;
 Game::Tile* lastSelectedTile = nullptr;
@@ -167,6 +168,13 @@ int main(int argc, char** argv) {
 
 void UpdateDrawFrame(void) {
 
+	if (Game::grid.GetTile({ 0, 0, 0 }).GetType() != Game::TileType::Player) {
+		playerAlive = false;
+	}
+	// I don't care that people hate gotos. Those people are boring.
+	if (!playerAlive) { goto afterTheThing; }
+
+
 
 	if (IsKeyDown(KEY_W)) {
 		camera.target.y -= cameraSpeed * GetFrameTime();
@@ -191,6 +199,9 @@ void UpdateDrawFrame(void) {
 
 
 	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+
+
+
 		lastSelectedTile = selectedTile;
 
 		for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
@@ -215,7 +226,9 @@ void UpdateDrawFrame(void) {
 	}
 
 
+
 	for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
+		if (!playerAlive) { break; }
 		key.second->Update();
 	}
 
@@ -226,11 +239,12 @@ void UpdateDrawFrame(void) {
 	if (GetTime() - Game::lastCityAdd >= Game::cityAddDelay) {
 		Game::lastCityAdd = GetTime();
 	}
-
-
+	
 	enemy.Update();
+
 	
 
+	afterTheThing:
 
 
 	BeginTextureMode(target);
@@ -253,13 +267,21 @@ void UpdateDrawFrame(void) {
 
 				if (render) {
 					Game::DrawTile(*key.second);
-					if (key.second == selectedTile) {
+					if (key.second == selectedTile && playerAlive) {
 						Game::DrawHexagon(key.second->GetPosition(), { 255, 255, 255, 100 }, 1.0f);
 					}
 				}
 
 			}
 		EndMode2D();       
+
+		if (!playerAlive) {
+			DrawRectangle(0, 0, 720, 720, { 0, 0, 0, 200 });
+			int textSize = 64;
+			DrawText("Game Over", 360 - MeasureText("Game Over", textSize) / 2, 350, textSize, WHITE);
+		}
+
+
 
 	EndTextureMode();
 
