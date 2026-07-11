@@ -1,6 +1,8 @@
 #pragma once
 #include "raylib.h"
+#include "raymath.h"
 #include <unordered_set>
+#include <vector>
 
 namespace Game {
 
@@ -10,6 +12,8 @@ namespace Game {
 	constexpr float HEX_SIZE = 50.0f;
 	constexpr float HEX_ORIGIN_X = 360.0f;
 	constexpr float HEX_ORIGIN_Y = 360.0f;
+	
+	int RoundFloat(float number);
 
 	class Hex {
 
@@ -37,12 +41,20 @@ namespace Game {
 
 	};
 
+
+
 	Hex CubeRound(float q, float r, float s);
 	Vector2 AxialRound(Vector2 axial);
 
 	Hex PixelToHex(Vector2 pixel);
 	Hex AxialToCube(Vector2 axial);
 	Vector2 CubeToAxial(Hex cube);
+
+	std::vector<Hex> GetHexNeighbors(Hex hex);
+	float HexDistance(Hex a, Hex b);
+
+	Hex HexLerp(Hex a, Hex b, float t);
+	std::vector<Hex> HexLinedraw(Hex a, Hex b); 
 
 	void DrawHexagon(Hex hex, Color color, float scale);
 

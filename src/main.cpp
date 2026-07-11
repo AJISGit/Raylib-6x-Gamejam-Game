@@ -3,10 +3,11 @@
 #include "grid.hpp"
 #include "timers.hpp"
 #include "textures.hpp"
+#include "enemy.hpp"
 #include <ctime>
 
 #if defined(PLATFORM_WEB)
-    #include <emscripten/emscripten.h> 
+	#include <emscripten/emscripten.h> 
 #endif
 
 #include <stdio.h> 
@@ -14,9 +15,9 @@
 
 #define SUPPORT_LOG_INFO
 #if defined(SUPPORT_LOG_INFO)
-    #define LOG(...) printf(__VA_ARGS__)
+	#define LOG(...) printf(__VA_ARGS__)
 #else
-    #define LOG(...)
+	#define LOG(...)
 #endif
 
 
@@ -43,6 +44,8 @@ bool showFps = false;
 
 Game::Tile* selectedTile = nullptr;
 Game::Tile* lastSelectedTile = nullptr;
+
+Game::Enemy enemy(nullptr);
 
 
 void UpdateDrawFrame(void);
@@ -92,7 +95,30 @@ int main(int argc, char** argv) {
 				}
 			}
    		}
+}
+	
+
+	// Spawn enemy king
+	int enemyQ;
+	int enemyR;
+	int enemyS;
+	int enemyPosLimit = 10;
+	while (true) {
+		enemyQ = GetRandomValue(-enemyPosLimit, enemyPosLimit);
+		enemyR = GetRandomValue(-enemyPosLimit, enemyPosLimit);
+		enemyS = GetRandomValue(-enemyPosLimit, enemyPosLimit);
+		if (enemyQ + enemyR + enemyS != 0) {
+			continue;
+		} else {
+			break;
+		}
 	}
+
+	Game::Tile& enemyTile = Game::grid.GetTile({ enemyQ, enemyR, enemyS });
+	enemyTile.SetType(Game::TileType::Enemy);
+	enemyTile.SetLandType(Game::TileLand::King);
+
+	enemy = Game::Enemy(&enemyTile);
 
 
 	// Set up selection
@@ -100,10 +126,10 @@ int main(int argc, char** argv) {
 
 
 	#if !defined(_DEBUG)
-    	SetTraceLogLevel(LOG_NONE); 
+		SetTraceLogLevel(LOG_NONE); 
 	#endif
 
-    InitWindow(screenWidth, screenHeight, "raylib gamejam template");
+	InitWindow(screenWidth, screenHeight, "raylib gamejam template");
 
 	// Initialize Stuff
 	target = LoadRenderTexture(720, 720);
@@ -112,7 +138,7 @@ int main(int argc, char** argv) {
 	Game::Textures::King = LoadTexture("resources/king.png");
 	Game::Textures::City = LoadTexture("resources/city.png");
 
-    
+	
 	camera.target = { 0.0f, 0.0f };
 	camera.zoom = 1.0f;
 
@@ -120,22 +146,22 @@ int main(int argc, char** argv) {
 
 	// Do Things
 	#if defined(PLATFORM_WEB)
-    	emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
+		emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 	#else
 		if (!showFps) {
-    		SetTargetFPS(60);
+			SetTargetFPS(60);
 		}
-	    while (!WindowShouldClose()) {
-	        UpdateDrawFrame();
-	    }
+		while (!WindowShouldClose()) {
+			UpdateDrawFrame();
+		}
 	#endif
 
 
 	// Bye Bye!
 	UnloadTexture(Game::Textures::King);
 	UnloadRenderTexture(target);
-    CloseWindow();
-    return 0;
+	CloseWindow();
+	return 0;
 }
 
 
@@ -200,6 +226,9 @@ void UpdateDrawFrame(void) {
 	if (GetTime() - Game::lastCityAdd >= Game::cityAddDelay) {
 		Game::lastCityAdd = GetTime();
 	}
+
+
+	enemy.Update();
 	
 
 

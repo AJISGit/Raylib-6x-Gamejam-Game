@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-Game::Tile::Tile(Game::Hex position, std::uint16_t troops = 1) {
+Game::Tile::Tile(Game::Hex position, std::int16_t troops = 1) {
 
 	SetPosition(position);
 	SetTroops(troops);
@@ -24,12 +24,12 @@ void Game::Tile::SetPosition(Game::Hex pos) {
 }
 
 
-std::uint16_t Game::Tile::GetTroops() const {
+std::int16_t Game::Tile::GetTroops() const {
 	return troops;
 }
 
 
-void Game::Tile::SetTroops(std::uint16_t troops) {
+void Game::Tile::SetTroops(std::int16_t troops) {
 	this->troops = troops;
 }
 
@@ -48,22 +48,22 @@ void Game::Tile::RemoveTroop() {
 }
 
 
-void Game::Tile::AddTroops(std::uint16_t troops) {
+void Game::Tile::AddTroops(std::int16_t troops) {
 	this->troops += troops;
 }
 
 
-void Game::Tile::RemoveTroops(std::uint16_t troops) {
+void Game::Tile::RemoveTroops(std::int16_t troops) {
 	this->troops -= troops;
 }
 
 
-std::uint16_t Game::Tile::GetStrength() const {
+std::int16_t Game::Tile::GetStrength() const {
 	return strength;
 }
 
 
-void Game::Tile::SetStrength(std::uint16_t strength) {
+void Game::Tile::SetStrength(std::int16_t strength) {
 	this->strength = strength;
 }
 
@@ -123,6 +123,11 @@ Color Game::Tile::GetColor() const {
 
 void Game::Tile::Update() {
 
+	if (GetTroops() < 0) {
+		SetTroops(0);
+	}
+	
+
 	switch (landType) {
 
 		case Game::TileLand::Blank:
@@ -135,6 +140,15 @@ void Game::Tile::Update() {
 			return;
 
 		case Game::TileLand::City:
+
+			/*
+			if (type == Game::TileType::Empty) {
+				if (troops < strength) {
+					strength = troops;
+				}
+			}
+			*/
+
 			if (type == Game::TileType::Empty) { return; }
 			if (GetTime() - Game::lastCityAdd > Game::cityAddDelay) {
 				AddTroop();
@@ -182,15 +196,15 @@ void Game::DrawTile(const Game::Tile& tile) {
 }
 
 
-void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::uint16_t troops = 0) {
+void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0) {
 
 	if (from.GetTroops() < 2) { return; }
 
 	
-	if ((from.GetType() != to.GetType()) && ((from.GetTroops() + 1) <= to.GetStrength())) { return; }
+	 if ((from.GetType() != to.GetType()) && ((from.GetTroops() + 1) <= to.GetStrength())) { return; }
 
 
-	std::uint16_t troopAmount = troops;
+	std::int16_t troopAmount = troops;
 	if (troops == 0) {
 		troopAmount = from.GetTroops() - 1;
 	}
@@ -198,15 +212,17 @@ void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::uint16_t troops = 
 
 	from.RemoveTroops(troopAmount);
 
-
 	if (from.GetType() != to.GetType()) {
 		to.AddTroops(troopAmount - to.GetStrength());
 	} else {
 		to.AddTroops(troopAmount);
 	}
 
-	to.SetType(Game::TileType::Player);
+	if ((to.GetType() == Game::TileType::Enemy) && (to.GetLandType() == Game::TileLand::King)) {
+		to.SetLandType(Game::TileLand::City);
+	}
 
+	to.SetType(from.GetType());
 }
 
 
@@ -218,6 +234,7 @@ void Game::MoveTroops(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0)
 	q = fromPos.GetQ() - toPos.GetQ();
 	r = fromPos.GetR() - toPos.GetR();
 	s = fromPos.GetS() - toPos.GetS();
+
 
 	if ((std::abs(q) > 1) || (std::abs(r) > 1) || (std::abs(s) > 1)) {
 		return;
