@@ -226,7 +226,9 @@ void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0
 }
 
 
-void Game::MoveTroops(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0) {
+void Game::MoveTroops(Game::Tile& from, Game::Tile &to, std::int16_t troops, Game::TileType owner) {
+
+	if (from.GetType() != owner) { return; }
 
 	Game::Hex fromPos = from.GetPosition();
 	Game::Hex toPos = to.GetPosition();

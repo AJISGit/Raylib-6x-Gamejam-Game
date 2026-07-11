@@ -54,6 +54,6 @@ namespace Game {
 
 	void DrawTile(const Tile& tile);
 	void MoveTroops_(Tile& from, Tile& to, std::int16_t troops);
-	void MoveTroops(Tile& from, Tile& to, std::int16_t troops);
+	void MoveTroops(Tile& from, Tile& to, std::int16_t troops, TileType owner);
 
 }

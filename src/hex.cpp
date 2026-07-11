@@ -204,8 +204,6 @@ Game::Hex Game::HexLerp(Game::Hex a, Game::Hex b, float t) {
 	float r = Lerp(a.GetR(), b.GetR(), t);
 	float s = Lerp(a.GetS(), b.GetS(), t);
 
-	std::cout << q << ' ' << r << ' ' << s << '\n';
-
 	return CubeRound(q, r, s);
 }
 

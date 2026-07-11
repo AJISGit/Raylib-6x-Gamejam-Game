@@ -20,6 +20,7 @@ namespace Game {
 
 
 		std::vector<Hex> pathToPlr;
+		std::vector<Hex> ownedHexes;
 		int i = 0;
 
 		int stage = 0;

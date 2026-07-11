@@ -211,7 +211,7 @@ void UpdateDrawFrame(void) {
 
 		}
 
-		Game::MoveTroops(*lastSelectedTile, *selectedTile, 0);
+		Game::MoveTroops(*lastSelectedTile, *selectedTile, 0, Game::TileType::Player);
 	}
 
 
