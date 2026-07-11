@@ -22,7 +22,7 @@ void Game::Enemy::Update() {
 		return;
 	}
 	moveTimer = GetTime();
-	moveDelay = GetRandomValue(1, 5) / 10.0f;
+	moveDelay = GetRandomValue(1, 4) / 10.0f;
 
 	if (king->GetType() != Game::TileType::Enemy) {
 		return;
@@ -32,11 +32,19 @@ void Game::Enemy::Update() {
 	lastSelectedTile = selectedTile;
 
 
+	if (stage == 3) {
+		stageTimeLimit = 30.0;
+	} else {
+		stageTimeLimit = 15.0;
+	}
+
+
 	if (!generatedPath) {
 		if (stage == 0) {
+			lastSelectedTile = king;
 			pathToPlr = Game::GetHexNeighbors(king->GetPosition());
 		} else if (stage == 1) {
-			Game::Hex hex = Game::GetHexNeighbors(king->GetPosition())[GetRandomValue(1, 3)];
+			Game::Hex hex = Game::GetHexNeighbors(king->GetPosition())[GetRandomValue(1, 4)];
 			lastSelectedTile = &Game::grid.GetTile(hex);
 			pathToPlr = Game::GetHexNeighbors(hex);
 		} else if (stage == 2) {
@@ -50,6 +58,9 @@ void Game::Enemy::Update() {
 		generatedPath = true;
 	}
 
+
+
+
 	
 	if (lastSelectedTile->GetTroops() < 2) {
 		lastSelectedTile = king;
@@ -58,9 +69,26 @@ void Game::Enemy::Update() {
 		return;
 	}
 	
-	if (i > (pathToPlr.size() - 1)) {
-		++stage;
+	if ((i > (pathToPlr.size() - 1)) || (GetTime() - stageTimer >= stageTimeLimit)) {
+		int randValue = GetRandomValue(1, 10);
+		if (randValue <= 3) {
+			stage--;
+		} else if (randValue > 8) {
+			stage = 3;
+		} else {
+			stage++;
+		}
+
+		if (stage < 0) {
+			stage = 3;
+		} else if (stage > 3) {
+			stage = 0;
+		}
+
+		std::cout << "Stage: " << stage << '\n';
+
 		generatedPath = false;
+		stageTimer = GetTime();
 		i = 0;
 		return;
 	}
