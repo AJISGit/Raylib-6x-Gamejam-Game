@@ -220,7 +220,7 @@ void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0
 		to.AddTroops(troopAmount);
 	}
 
-	if ((to.GetType() == Game::TileType::Enemy) && (to.GetLandType() == Game::TileLand::King)) {
+	if ((to.GetType() == Game::TileType::Enemy) && (to.GetLandType() == Game::TileLand::King) && (from.GetType() != to.GetType())) {
 		to.SetLandType(Game::TileLand::City);
 	}
 

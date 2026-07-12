@@ -51,12 +51,13 @@ Game::Tile* lastSelectedTile = nullptr;
 Game::Enemy enemy(nullptr);
 
 
-enum class ScreenState { Logo, Game };
-ScreenState currentScreen = ScreenState::Logo;
+enum class ScreenState { Menu, Game };
+ScreenState currentScreen = ScreenState::Menu;
 
 
 void UpdateDrawFrame(void);
 void GameUpdateDraw();
+void MenuUpdateDraw();
 
 
 int main(int argc, char** argv) {
@@ -319,7 +320,54 @@ void GameUpdateDraw(void) {
 }
 
 
+void MenuUpdateDraw() {
+	
+	if (IsKeyPressed(KEY_ENTER)) {
+		currentScreen = ScreenState::Game;
+	}
+
+	BeginDrawing();
+		ClearBackground({ 200, 200, 200, 255 });
+
+
+		for (std::pair<const Game::Hex, Game::Tile*> key : Game::grid.GetTiles()) {
+
+			Vector2 pixelPos = key.first.ToPixel();
+			bool render = true;
+
+
+			pixelPos = GetWorldToScreen2D(pixelPos, camera);				
+			if (
+				(pixelPos.x < renderingLimitLeft) || (pixelPos.x > renderingLimitRight) ||
+				(pixelPos.y < renderingLimitUp) || (pixelPos.y > renderingLimitDown)
+			) {
+				render = false;
+			}
+
+			if (render) {
+				Game::DrawHexagon(key.second->GetPosition(), BLACK, 1.0f);
+				Game::DrawHexagon(key.second->GetPosition(), { 200, 200, 200, 255 }, 0.98f);
+			}
+		}
+
+
+		int titleTextSize = 64;
+		int buttonTextSize = 32;
+		DrawText("Hex Armies", 360 - MeasureText("Hex Armies", titleTextSize) / 2, 200, titleTextSize, BLACK);
+		DrawText("Press enter to play", 360 - MeasureText("Press enter to play", buttonTextSize) / 2, 350, buttonTextSize, BLACK);
+	EndDrawing();
+
+}
+
+
 void UpdateDrawFrame() {
-	GameUpdateDraw();
+	switch (currentScreen) {
+		case ScreenState::Menu:
+			MenuUpdateDraw();
+			break;
+		case ScreenState::Game:
+			GameUpdateDraw();
+			break;
+	}
 }
 
