@@ -44,15 +44,21 @@ Camera2D camera = { 0 };
 
 bool showFps = false;
 bool playerAlive = true;
+bool won = false;
 
 Game::Tile* selectedTile = nullptr;
 Game::Tile* lastSelectedTile = nullptr;
 
+Game::Tile* enmyTile = nullptr;
 Game::Enemy enemy(nullptr);
 
 
 enum class ScreenState { Menu, Game };
 ScreenState currentScreen = ScreenState::Menu;
+
+
+bool musicPlaying = false;
+Music musicStream = { 0 };
 
 
 void UpdateDrawFrame(void);
@@ -104,7 +110,7 @@ int main(int argc, char** argv) {
 				}
 			}
    		}
-}
+	}
 	
 
 	// Spawn enemy king
@@ -128,6 +134,7 @@ int main(int argc, char** argv) {
 	enemyTile.SetLandType(Game::TileLand::King);
 
 	enemy = Game::Enemy(&enemyTile);
+	enmyTile = &enemyTile;
 
 
 	// Set up selection
@@ -139,6 +146,9 @@ int main(int argc, char** argv) {
 	#endif
 
 	InitWindow(screenWidth, screenHeight, "raylib gamejam template");
+	InitAudioDevice();
+
+
 
 	// Initialize Stuff
 	target = LoadRenderTexture(720, 720);
@@ -149,6 +159,8 @@ int main(int argc, char** argv) {
 
 	camera.target = { 0.0f, 0.0f };
 	camera.zoom = 1.0f;
+
+	musicStream = LoadMusicStream("resources/music.wav");
 
 
 
@@ -166,7 +178,9 @@ int main(int argc, char** argv) {
 
 
 	// Bye Bye!
+	UnloadMusicStream(musicStream);
 	UnloadRenderTexture(target);
+	CloseAudioDevice();
 	CloseWindow();
 	return 0;
 }
@@ -174,11 +188,33 @@ int main(int argc, char** argv) {
 
 void GameUpdateDraw(void) {
 
+	if (!musicPlaying) {
+		PlayMusicStream(musicStream);
+		SetMusicPan(musicStream, 0.0f);
+		SetMusicVolume(musicStream, 0.8f);
+		musicPlaying = true;
+	}
+
+	UpdateMusicStream(musicStream);
+
 	if (Game::grid.GetTile({ 0, 0, 0 }).GetType() != Game::TileType::Player) {
 		playerAlive = false;
 	}
+	
+	if (enmyTile->GetType() != Game::TileType::Enemy) {
+		playerAlive = false;
+		won = true;
+	}
+
+
 	// I don't care that people hate gotos. Those people are boring.
-	if (!playerAlive) { goto afterTheThing; }
+	if (!playerAlive) {
+		if (musicPlaying) {
+			StopMusicStream(musicStream);
+			musicPlaying = false;
+		}
+		goto afterTheThing;
+	}
 
 
 
@@ -299,7 +335,13 @@ void GameUpdateDraw(void) {
 		if (!playerAlive) {
 			DrawRectangle(0, 0, 720, 720, { 0, 0, 0, 200 });
 			int textSize = 64;
-			DrawText("Game Over", 360 - MeasureText("Game Over", textSize) / 2, 350, textSize, WHITE);
+			std::string text;
+			if (!won) {
+				text = "Game Over";
+			} else {
+				text = "You Win!";
+			}
+			DrawText(text.c_str(), 360 - MeasureText(text.c_str(), textSize) / 2, 350, textSize, WHITE);
 		}
 
 
