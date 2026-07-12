@@ -1,14 +1,15 @@
-## Raylib 6.x Gamejam Game
+## Hex Armies
 
-!["Raylib 6.x Gamejam Game"](screenshots/screenshot000.png "Raylib 6.x Gamejam Game")
+!["Hex Armies"](screenshots/titlepicture.png "Hex Armies")
 
 ### Description
 
 Description
 
+In Hex Armies, you have to capture the enemy's king before it captures yours.
 
-_TODO: Show your game to the world, animated GIFs recommended!._
+Gather troops to defend against and defeat your enemy.
 
 ### Links
 
- - itch.io Release: $(itch.io Game Page)
+ - itch.io Release: [Hex Armies](https://ajisboss.itch.io/hex-armies)
