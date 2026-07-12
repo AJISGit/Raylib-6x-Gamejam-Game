@@ -40,6 +40,8 @@ const float cameraSpeed = 400.0f;
 RenderTexture2D target = { 0 };
 Camera2D camera = { 0 };
 
+
+
 bool showFps = false;
 bool playerAlive = true;
 
@@ -49,7 +51,12 @@ Game::Tile* lastSelectedTile = nullptr;
 Game::Enemy enemy(nullptr);
 
 
+enum class ScreenState { Logo, Game };
+ScreenState currentScreen = ScreenState::Logo;
+
+
 void UpdateDrawFrame(void);
+void GameUpdateDraw();
 
 
 int main(int argc, char** argv) {
@@ -139,7 +146,6 @@ int main(int argc, char** argv) {
 	Game::Textures::King = LoadTexture("resources/king.png");
 	Game::Textures::City = LoadTexture("resources/city.png");
 
-	
 	camera.target = { 0.0f, 0.0f };
 	camera.zoom = 1.0f;
 
@@ -159,14 +165,13 @@ int main(int argc, char** argv) {
 
 
 	// Bye Bye!
-	UnloadTexture(Game::Textures::King);
 	UnloadRenderTexture(target);
 	CloseWindow();
 	return 0;
 }
 
 
-void UpdateDrawFrame(void) {
+void GameUpdateDraw(void) {
 
 	if (Game::grid.GetTile({ 0, 0, 0 }).GetType() != Game::TileType::Player) {
 		playerAlive = false;
@@ -189,12 +194,27 @@ void UpdateDrawFrame(void) {
 		camera.target.x += cameraSpeed * GetFrameTime();
 	}
 
+	// x 1500 y 750
+
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 		
 		Vector2 delta = GetMouseDelta();
 		delta = Vector2Scale(delta, -1.0f / camera.zoom);
 		camera.target = Vector2Add(camera.target, delta);
 
+	}
+
+
+	if (camera.target.x < -1500) {
+		camera.target.x = -1500;
+	} else if (camera.target.x > 1500) {
+		camera.target.x = 1500;
+	}
+
+	if (camera.target.y < -750) {
+		camera.target.y = -750;
+	} else if (camera.target.y > 750) {
+		camera.target.y = 750;
 	}
 
 
@@ -297,3 +317,9 @@ void UpdateDrawFrame(void) {
     EndDrawing();
 
 }
+
+
+void UpdateDrawFrame() {
+	GameUpdateDraw();
+}
+
