@@ -187,9 +187,11 @@ void Game::DrawTile(const Game::Tile& tile) {
 	std::string troopText = std::to_string(tile.GetTroops());
 	int textSize = 15;
 
+	/*
 	if ((tile.GetType() == Game::TileType::Empty) && (tile.GetLandType() == Game::TileLand::City)) {
 		troopText = std::to_string(tile.GetStrength());
 	}
+	*/
 
 	DrawText(troopText.c_str(), pixelPos.x - MeasureText(troopText.c_str(), textSize) + 3, pixelPos.y - 5.0f, textSize, WHITE);
 

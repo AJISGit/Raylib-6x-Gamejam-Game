@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
 				
 				if (GetRandomValue(1, cityChance) == 1) {
 					tile.SetLandType(Game::TileLand::City);
-					tile.SetStrength(GetRandomValue(30, 50));
+					tile.SetTroops(GetRandomValue(30, 50));
 					tile.SetType(Game::TileType::Empty);
 
 
