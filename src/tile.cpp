@@ -203,7 +203,7 @@ void Game::MoveTroops_(Game::Tile& from, Game::Tile &to, std::int16_t troops = 0
 	if (from.GetTroops() < 2) { return; }
 
 	
-	 if ((from.GetType() != to.GetType()) && ((from.GetTroops() + 1) <= to.GetStrength())) { return; }
+	if ((from.GetType() != to.GetType()) && ((from.GetTroops() + 1) <= to.GetTroops())) { return; }
 
 
 	std::int16_t troopAmount = troops;

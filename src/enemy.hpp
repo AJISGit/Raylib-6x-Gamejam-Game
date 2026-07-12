@@ -10,7 +10,7 @@ namespace Game {
 		private:
 
 		double moveTimer = 0.0;
-		double moveDelay = 0.3;
+		double moveDelay = 0.2;
 		double stageTimer = 0.0;
 		double stageTimeLimit = 15.0;
 
