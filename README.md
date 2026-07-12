@@ -4,8 +4,6 @@
 
 ### Description
 
-Description
-
 In Hex Armies, you have to capture the enemy's king before it captures yours.
 
 Gather troops to defend against and defeat your enemy.
